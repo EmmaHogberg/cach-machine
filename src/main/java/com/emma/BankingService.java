@@ -3,79 +3,94 @@ package com.emma;
 public class BankingService {
 
     private final CustomersService customersService;
-    private BankCustomer activeCustomer;
 
     public BankingService(CustomersService customersService) {
         this.customersService = customersService;
     }
 
 
-    public boolean login(int id, int pinCodeInput) {
-        BankCustomer customer = customersService.getCustomerByID(id);
 
-        if (customer == null) {
-            return false;
+    public BankCustomer login(int id, int pinCodeInput) {
+        BankCustomer bankCustomer = customersService.getCustomerByID(id);
+
+        if (bankCustomer == null) {
+            return null;
         }
-        if (!customersService.isCardOpenForAnotherPinCodeTry(activeCustomer)) {
-            return false;
+        if (bankCustomer.isCardBocked()) {
+            return null;
         }
 
-        if (!customer.isPinCodeCorrect(pinCodeInput)) {
-            customer.setPinAttempts(customer.getPinAttempts()+1);
+        if (!bankCustomer.isPinCodeCorrect(pinCodeInput)) {
+            bankCustomer.setPinAttempts(bankCustomer.getPinAttempts()+1);
+            if (bankCustomer.getPinAttempts() == 3) {
+                bankCustomer.setCardBocked(true);
+            }
+            return null;
+        }
+        bankCustomer.setPinAttempts(0);
+
+        return bankCustomer;
+    }
+
+    // Method for message to user when wrong pin input
+    public String sendMessageToCustomerWhenWrongPinInput(BankCustomer activeCustomer) {
+        String message = "";
+
+        switch (activeCustomer.getPinAttempts()) {
+            case 1 -> {
+                message = "Wrong pin input, you have 2 more attempts";
+            }
+            case 2 -> {
+                message = "Wrong pin input, you have 1 more attempt";
+            }
+            case 3 -> {
+                message = "You hade given the wrong pincode input three times, the card is blocked";
+            }
+        }
+        System.out.println(message);
+        return message;
+    }
+
+
+
+    // Method for balance
+    public int getAccountBalance(BankCustomer activeCustomer) {
+        return activeCustomer.getAccountBalance();
+    }
+
+
+    // Methods for deposit
+    public boolean RequestDepositToAccount(BankCustomer activeCustomer, int deposit) {
+        if (deposit == 0) {
             return false;
         }
-        customer.setPinAttempts(0);
-        activeCustomer = customer;
+        addDepositToAccount(activeCustomer,deposit);
         return true;
     }
 
-
-
-
-    public int getAccountBalance() {
-        System.out.println("Balance: " + activeCustomer.getAccountBalance());
-        return activeCustomer.getAccountBalance();
-    }
-
-    public int depositAndReturnNewAccountBalance(int deposit) {
+    public void addDepositToAccount(BankCustomer activeCustomer, int deposit) {
         activeCustomer.setAccountBalance(activeCustomer.getAccountBalance() + deposit);
-
-        System.out.println("Updated balance: " + activeCustomer.getAccountBalance());
-        return activeCustomer.getAccountBalance();
     }
 
 
-//    public boolean isCardOpenForAnotherPinCodeTry() {
-//        switch (activeCustomer.getPinAttempts()) {
-//            case 1 -> System.out.println("Wrong pin input, you have 2 more attempts");
-//            case 2 -> System.out.println("Wrong pin input, you have 1 more attempts");
-//            case 3 -> {
-//                activeCustomer.setCardBocked(true);
-//                System.out.println("You hade given the wrong pincode input three times, the card is blocked");
-//                return false;
-//            }
-//        }
-//        return true;
-//    }
+    // Methods for withdraw
+    public int requestWithdraw(BankCustomer activeCustomer, int moneyRequest) {
+
+        int balance = activeCustomer.getAccountBalance();
+        if (balance >= moneyRequest) {
+            withdrawMoney(activeCustomer, moneyRequest);
+            return moneyRequest;
+        }
+
+        return 0;
+    }
 
 
+    public void withdrawMoney(BankCustomer activeCustomer, int moneyRequest) {
 
+        int balance = activeCustomer.getAccountBalance();
+        activeCustomer.setAccountBalance(balance - moneyRequest);
+    }
 
-
-
-
-
-
-//    private BankCustomer findCustomerByID(int id) {
-//
-//        ArrayList<BankCustomer> listOfCustomers = customersService.getCostumers();
-//
-//        for (BankCustomer customer : listOfCustomers) {
-//            if (customer.getId() == id) {
-//                return customer;
-//            }
-//        }
-//        return null;
-//    }
 
 }

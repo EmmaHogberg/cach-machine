@@ -11,9 +11,9 @@ import static org.mockito.Mockito.when;
 
 class CustomersServiceTest {
 
-    private CustomersService customersServiceMock;
-    private BankingService bankingService;
-    private ArrayList<BankCustomer> listOfCustomers;
+    private CustomersService customersService;
+    private CustomerDataBase customerDataBaseMock;
+    ArrayList<BankCustomer> listOfCustomers;
     private BankCustomer customerOne = new BankCustomer(123, 8888, 0, false, 2750, "BankOfSweden");
     private BankCustomer customerTwo = new BankCustomer(234, 4545, 1, false, 26300, "BankOfSweden");
     private BankCustomer customerThree = new BankCustomer(345, 9894, 2, false, 27, "BankOfSweden");
@@ -22,92 +22,35 @@ class CustomersServiceTest {
 
     @BeforeEach
     void setup() {
-
-        customersServiceMock = mock(CustomersService.class);
-        bankingService = new BankingService(customersServiceMock);
-        listOfCustomers = new ArrayList<>();
-        listOfCustomers.add(customerOne);
-        listOfCustomers.add(customerTwo);
-        listOfCustomers.add(customerThree);
-        listOfCustomers.add(customerFour);
+         customerDataBaseMock = mock(CustomerDataBase.class);
+         listOfCustomers = new ArrayList<>();
+         listOfCustomers.add(customerOne);
+         listOfCustomers.add(customerTwo);
+         listOfCustomers.add(customerThree);
+         listOfCustomers.add(customerFour);
+         customersService = new CustomersService(listOfCustomers);
     }
 
+
+
+    // getCustomerByID()
     @Test
-    void should_ReturnCorrectCustomer_when_GetCustomerByID() {
-        when(customersServiceMock.getCustomerByID(123)).thenReturn(customerOne);
+    void should_ReturnCorrectCustomer_when_MatchingID() {
+        when(customerDataBaseMock.getCustomers()).thenReturn(listOfCustomers);
 
         BankCustomer expected = customerOne;
-        BankCustomer actual = customersServiceMock.getCustomerByID(123);
+        BankCustomer actual = customersService.getCustomerByID(123);
 
         assertEquals(expected, actual);
     }
 
-
-
-
-
-
-
-
-
-
-
     @Test
-    void should_ReturnFalse_when_ActiveCostumerAndNoCorrectPinCode() {
-        when(customersServiceMock.getCustomerByID(0)).thenReturn(customerOne);
-        assertFalse(bankingService.login(customerOne.getId(), 4545));
+    void should_ReturnNull_when_NoMatchingID() {
+        when(customerDataBaseMock.getCustomers()).thenReturn(listOfCustomers);
+
+        BankCustomer actual = customersService.getCustomerByID(888);
+
+        assertNull(actual);
     }
-
-    @Test
-    void should_ReturnFalse_when_ActiveCostumerDoesNotExistInListOfCostumers() {
-        when(customersServiceMock.getCustomerByID(777)).thenReturn(null);
-        assertFalse(bankingService.login(777, 4545));
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-//    @Test
-//    void should_ReturnTrue_when_CustomerWithZeroWrongPinInput() {
-//        when(customersServiceMock.getCostumers()).thenReturn(listOfCustomers);
-//        assertTrue(bankingService.login(customerOne.getId(), customerOne.getPinCode()));
-//    }
-//
-//    @Test
-//    void should_ReturnTrue_when_CustomerWithOneWrongPinInput() {
-//        when(customersServiceMock.getCostumers()).thenReturn(listOfCustomers);
-//        assertTrue(bankingService.login(customerTwo.getId(), customerTwo.getPinCode()));
-//    }
-//
-//    @Test
-//    void should_ReturnTrue_when_CustomerWithTwoWrongPinInput() {
-//        when(customersServiceMock.getCostumers()).thenReturn(listOfCustomers);
-//        assertTrue(bankingService.login(customerThree.getId(), customerThree.getPinCode()));
-//    }
-//
-//    @Test
-//    void should_ReturnTrue_when_CustomerWithThreeWrongPinInput() {
-//        when(customersServiceMock.getCostumers()).thenReturn(listOfCustomers);
-//        assertFalse(bankingService.login(customerFour.getId(), customerFour.getPinCode()));
-//    }
-//
-//    @Test
-//    void should_ReturnAccountBalance_when_ActionGetAccountBalance() {
-//        when(customersServiceMock.getCostumers()).thenReturn(listOfCustomers);
-//        bankingService.login(customerOne.getId(), customerOne.getPinCode());
-//
-//        int expected = customerOne.getAccountBalance();
-//        int actual = bankingService.getAccountBalance();
-//
-//        assertEquals(expected, actual);
-//    }
 
 }
