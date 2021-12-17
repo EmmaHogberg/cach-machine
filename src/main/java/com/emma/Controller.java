@@ -5,6 +5,7 @@ public class Controller {
     BankingService bankingService;
     BankCustomer activeCustomer;
 
+
     public Controller(BankingService bankingService) {
         this.bankingService = bankingService;
     }
@@ -20,16 +21,19 @@ public class Controller {
         int requestedMoney = 400;
         int payout;
 
+        String bankName;
         String messageToCustomer;
 
 
-
-
+        // Try login
         activeCustomer = bankingService.login(cardID, pinCodeInput);
         messageToCustomer = bankingService.sendMessageToCustomerWhenWrongPinInput(activeCustomer);
 
 
-        if (activeCustomer != null) {
+        // Get and confirm Bank name
+        bankName = BankingService.getNameOfBank();
+
+        if (activeCustomer != null && isMatchingBankName(bankName)) {
 
             // Balance
             accountBalance = bankingService.getAccountBalance(activeCustomer);
@@ -56,12 +60,25 @@ public class Controller {
             }
 
 
+            // End the ATM process, logout
+            boolean isLoggedOut = endAtmProcess();
+            if (isLoggedOut) {
+                messageToCustomer = "Banking process is ended, take your card";
+            }
         }
-
-
-
-
     }
 
+
+    // Method for exit
+    public boolean endAtmProcess() {
+        activeCustomer = null;
+        return true;
+    }
+
+
+    // Method for matching bank name
+    private boolean isMatchingBankName(String bankName) {
+        return activeCustomer.getBankName().equals(bankName);
+    }
 
 }

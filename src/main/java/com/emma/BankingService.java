@@ -2,16 +2,23 @@ package com.emma;
 
 public class BankingService {
 
-    private final CustomersService customersService;
+    private final BankRepository bankRepository;
+    private static final String bankName = "BankOfSweden";
 
-    public BankingService(CustomersService customersService) {
-        this.customersService = customersService;
+    public BankingService(BankRepository bankRepository) {
+        this.bankRepository = bankRepository;
     }
 
 
+    // Static method to get bank name
+    public static String getNameOfBank() {
+        return bankName;
+    }
 
+
+    // Method to login customer
     public BankCustomer login(int id, int pinCodeInput) {
-        BankCustomer bankCustomer = customersService.getCustomerByID(id);
+        BankCustomer bankCustomer = bankRepository.getCustomerByID(id);
 
         if (bankCustomer == null) {
             return null;
@@ -32,6 +39,7 @@ public class BankingService {
         return bankCustomer;
     }
 
+
     // Method for message to user when wrong pin input
     public String sendMessageToCustomerWhenWrongPinInput(BankCustomer activeCustomer) {
         String message = "";
@@ -50,7 +58,6 @@ public class BankingService {
         System.out.println(message);
         return message;
     }
-
 
 
     // Method for balance
@@ -85,12 +92,9 @@ public class BankingService {
         return 0;
     }
 
-
     public void withdrawMoney(BankCustomer activeCustomer, int moneyRequest) {
 
         int balance = activeCustomer.getAccountBalance();
         activeCustomer.setAccountBalance(balance - moneyRequest);
     }
-
-
 }

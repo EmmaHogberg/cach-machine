@@ -25,18 +25,6 @@ public class BankCustomer {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public int getPinCode() {
-        return pinCode;
-    }
-
-    public void setPinCode(int pinCode) {
-        this.pinCode = pinCode;
-    }
-
     public int getPinAttempts() {
         return pinAttempts;
     }
@@ -65,10 +53,9 @@ public class BankCustomer {
         return bankName;
     }
 
-    public void setBankName(String bankName) {
-        this.bankName = bankName;
-    }
 
+
+    // Method to check if pinCodeInput matches pinCode
     public boolean isPinCodeCorrect(int pinCodeInput) {
         return pinCodeInput == pinCode;
     }

@@ -2,7 +2,7 @@ package com.emma;
 
 import java.util.ArrayList;
 
-public class CustomerDataBase {
+public class BankDatabase {
 
         public ArrayList<BankCustomer> getCustomers() {
 

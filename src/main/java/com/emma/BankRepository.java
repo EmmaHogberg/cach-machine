@@ -2,11 +2,11 @@ package com.emma;
 
 import java.util.ArrayList;
 
-public class CustomersService {
+public class BankRepository {
 
     ArrayList<BankCustomer> listOfCustomers;
 
-    public CustomersService(ArrayList<BankCustomer> listOfCustomers) {
+    public BankRepository(ArrayList<BankCustomer> listOfCustomers) {
         this.listOfCustomers = listOfCustomers;
 
     }

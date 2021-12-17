@@ -4,14 +4,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class BankingServiceTest {
 
-    private CustomersService customersServiceMock;
+    private BankRepository bankRepositoryMock;
     private BankingService bankingService;
-    private BankCustomer activeCustomerMock;
     private BankCustomer customerOne = new BankCustomer(123, 8888, 0, false, 2750, "BankOfSweden");
     private BankCustomer customerTwo = new BankCustomer(234, 4545, 1, false, 26300, "BankOfSweden");
     private BankCustomer customerThree = new BankCustomer(345, 9894, 2, false, 27, "BankOfSweden");
@@ -20,30 +18,29 @@ class BankingServiceTest {
 
     @BeforeEach
     void setup() {
-        customersServiceMock = mock(CustomersService.class);
-        bankingService = new BankingService(customersServiceMock);
-//        activeCustomerMock = mock(BankCustomer.class);
+        bankRepositoryMock = mock(BankRepository.class);
+        bankingService = new BankingService(bankRepositoryMock);
     }
 
 
     // login()
     @Test
     void should_ReturnNull_when_NoMatchingId() {
-        when(customersServiceMock.getCustomerByID(777)).thenReturn(customerOne);
+        when(bankRepositoryMock.getCustomerByID(777)).thenReturn(customerOne);
         BankCustomer actual = bankingService.login(777, 4545);
         assertNull(actual);
     }
 
     @Test
     void should_ReturnNull_when_CardIsBlockedEvenIfIdAndPinCorrect() {
-        when(customersServiceMock.getCustomerByID(456)).thenReturn(customerFour);
+        when(bankRepositoryMock.getCustomerByID(456)).thenReturn(customerFour);
         BankCustomer actual = bankingService.login(456, 7878);
         assertNull(actual);
     }
 
     @Test
     void should_ReturnCustomer_when_IdAndCorrectPinCodeInput() {
-        when(customersServiceMock.getCustomerByID(123)).thenReturn(customerOne);
+        when(bankRepositoryMock.getCustomerByID(123)).thenReturn(customerOne);
         BankCustomer expected = customerOne;
         BankCustomer actual = bankingService.login(123, 8888);
         assertEquals(expected, actual);
@@ -51,19 +48,34 @@ class BankingServiceTest {
 
     @Test
     void should_ReturnNull_when_IdAndNoCorrectPinCodeInput() {
-        when(customersServiceMock.getCustomerByID(123)).thenReturn(customerOne);
+        when(bankRepositoryMock.getCustomerByID(123)).thenReturn(customerOne);
         BankCustomer actual = bankingService.login(123, 4545);
         assertNull(actual);
     }
 
     @Test
     void should_ReturnNull_and_SetCardAsBlocked_when_NoCorrectPinCodeInputThirdTime() {
-        when(customersServiceMock.getCustomerByID(345)).thenReturn(customerThree);
+        when(bankRepositoryMock.getCustomerByID(345)).thenReturn(customerThree);
 
         assertNull(bankingService.login(345, 3467));
 
         boolean isCardSetAsBlocked = customerThree.isCardBocked();
         assertTrue(isCardSetAsBlocked);
+    }
+
+    @Test
+    void should_SetPinAttemptsToZero_when_CorrectPinCode() {
+        when(bankRepositoryMock.getCustomerByID(345)).thenReturn(customerThree);
+
+        int firstExpected = 2;
+        int firstActual = customerThree.getPinAttempts();
+
+        bankingService.login(345, 9894);
+        int expected = 0;
+        int actual = customerThree.getPinAttempts();
+
+        assertEquals(firstExpected, firstActual);
+        assertEquals(expected, actual);
     }
 
 
@@ -94,24 +106,6 @@ class BankingServiceTest {
     void should_ReturnCorrectMessage_when_ThreeWrongPinInput() {
         String expected = "You hade given the wrong pincode input three times, the card is blocked";
         String actual = bankingService.sendMessageToCustomerWhenWrongPinInput(customerFour);
-        assertEquals(expected, actual);
-    }
-
-
-
-
-    @Test
-    void should_SetPinAttemptsToZero_when_CorrectPinCode() {
-        when(customersServiceMock.getCustomerByID(345)).thenReturn(customerThree);
-
-        int firstExpected = 2;
-        int firstActual = customerThree.getPinAttempts();
-
-        bankingService.login(345, 9894);
-        int expected = 0;
-        int actual = customerThree.getPinAttempts();
-
-        assertEquals(firstExpected, firstActual);
         assertEquals(expected, actual);
     }
 
